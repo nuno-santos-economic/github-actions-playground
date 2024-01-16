@@ -36,7 +36,7 @@ jobs:
       - name: Set commit count
         id: commit_count
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
-        run: echo "::set-output name=count::$(git rev-list --count origin/olimpo-pending-changes..HEAD)"
+        run: echo "::set-output name=count::$(git rev-list --count olimpo-pending-changes..HEAD)"
 
       - name: Validate commit count
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
