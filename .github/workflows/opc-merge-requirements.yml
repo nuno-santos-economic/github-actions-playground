@@ -31,12 +31,15 @@ jobs:
           
       - name: Checkout code
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set commit count
         id: commit_count
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
-        run: echo "::set-output name=count::$(git rev-list --count olimpo-pending-changes..HEAD)"
+        run: echo "count=$(git rev-list --count origin/olimpo-pending-changes..HEAD)" >> $GITHUB_OUTPUT
 
       - name: Validate commit count
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
