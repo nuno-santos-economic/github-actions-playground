@@ -5,13 +5,12 @@ on:
     types: [opened, synchronize]
     branches:
       - 'olimpo-pending-changes'
-      - 'apollo-pending-changes'
   workflow_dispatch:
     inputs:
       bypass-validation:
         description: 'Bypass the validation check'
         required: true
-        default: 'true'
+        default: 'false'
         type: string
 
 jobs:
@@ -37,7 +36,7 @@ jobs:
       - name: Set commit count
         id: commit_count
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
-        run: echo "::set-output name=count::$(git rev-list --count HEAD ^${{ github.event.before }})"
+        run: echo "::set-output name=count::$(git rev-list --count origin/olimpo-pending-changes..HEAD)"
 
       - name: Validate commit count
         if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
