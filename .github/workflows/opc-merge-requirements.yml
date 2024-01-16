@@ -1,0 +1,50 @@
+name: Validate Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - 'olimpo-pending-changes'
+      - 'apollo-pending-changes'
+  workflow_dispatch:
+    inputs:
+      bypass-validation:
+        description: 'Bypass the validation check'
+        required: true
+        default: 'true'
+        type: string
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Echo Input Parameter
+        run: |
+          echo "github.event.before: ${{ github.event.before }}"
+            
+      - name: Bypass Validation
+        id: bypass_validation
+        if: ${{ inputs.bypass-validation == 'true' }}
+        run: |
+          echo "Bypassing validation..."
+          echo "::set-output name=skip_steps::true"
+          
+      - name: Checkout code
+        if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
+        uses: actions/checkout@v2
+
+      - name: Set commit count
+        id: commit_count
+        if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
+        run: echo "::set-output name=count::$(git rev-list --count HEAD ^${{ github.event.before }})"
+
+      - name: Validate commit count
+        if: ${{ steps.bypass_validation.outputs.skip_steps != 'true' }}
+        run: |
+          if [ "${{ steps.commit_count.outputs.count }}" -eq 1 ]; then
+            echo "Validation passed: Pull request contains only one commit."
+          else
+            echo "Validation failed: Pull request must contain only one commit."
+            exit 1
+          fi
